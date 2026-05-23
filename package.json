@@ -1,0 +1,26 @@
+{
+  "name": "atomic-lens-v1",
+  "version": "0.1.0",
+  "description": "Minimal local Electron audit companion prototype.",
+  "main": "out/main/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "npm run typecheck && electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "electron-vite": "^5.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "electron": "^36.3.1",
+    "typescript": "^5.8.3"
+  }
+}
