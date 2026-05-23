@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import type { AuditCategory, AuditNote, AuditPriority, AuditSession, NewNoteInput } from "../../shared/types";
+import type { AuditApi, AuditCategory, AuditNote, AuditPriority, AuditSession, NewNoteInput } from "../../shared/types";
 
 const categories: AuditCategory[] = ["ux", "bug", "feature", "code", "content", "other"];
 const priorities: AuditPriority[] = ["P0", "P1", "P2", "P3"];
+const missingPreloadMessage = "Atomic Lens preload API is not available. Check Electron preload configuration.";
 
 const emptyNote: NewNoteInput = {
   title: "",
@@ -45,11 +46,25 @@ function App(): JSX.Element {
   );
 
   useEffect(() => {
+    if (!window.atomicLens) {
+      setError(missingPreloadMessage);
+      setStatus("Preload unavailable");
+      return;
+    }
+
     void runAction("Loaded latest session", async () => {
-      const latestSession = await window.auditApi.getCurrentSession();
+      const latestSession = await requireAtomicLens().getCurrentSession();
       setSession(latestSession);
     });
   }, []);
+
+  function requireAtomicLens(): AuditApi {
+    if (!window.atomicLens) {
+      throw new Error(missingPreloadMessage);
+    }
+
+    return window.atomicLens;
+  }
 
   async function runAction(successMessage: string, action: () => Promise<void>): Promise<void> {
     setIsBusy(true);
@@ -75,7 +90,7 @@ function App(): JSX.Element {
     event.preventDefault();
 
     await runAction("New session created", async () => {
-      const createdSession = await window.auditApi.createSession({ projectName, sessionTitle });
+      const createdSession = await requireAtomicLens().createSession({ projectName, sessionTitle });
       setSession(createdSession);
       setSelectedNoteId(undefined);
       setNoteDraft(emptyNote);
@@ -86,7 +101,7 @@ function App(): JSX.Element {
     event.preventDefault();
 
     await runAction("Note saved", async () => {
-      const updatedSession = await window.auditApi.saveNote(noteDraft);
+      const updatedSession = await requireAtomicLens().saveNote(noteDraft);
       setSession(updatedSession);
       setSelectedNoteId(updatedSession.notes[0]?.id);
       setNoteDraft(emptyNote);
@@ -95,7 +110,7 @@ function App(): JSX.Element {
 
   async function handleCaptureScreenshot(): Promise<void> {
     await runAction(selectedNoteId ? "Screenshot attached to selected note" : "Screenshot captured for next note", async () => {
-      const result = await window.auditApi.captureScreenshot(selectedNoteId);
+      const result = await requireAtomicLens().captureScreenshot(selectedNoteId);
       setSession(result.session);
 
       if (!selectedNoteId) {
@@ -106,14 +121,14 @@ function App(): JSX.Element {
 
   async function handleExportMarkdown(): Promise<void> {
     await runAction("Markdown report exported", async () => {
-      const result = await window.auditApi.exportMarkdown();
+      const result = await requireAtomicLens().exportMarkdown();
       setStatus(`Markdown exported to ${result.filePath}`);
     });
   }
 
   async function handleExportJson(): Promise<void> {
     await runAction("JSON data exported", async () => {
-      const result = await window.auditApi.exportJson();
+      const result = await requireAtomicLens().exportJson();
       setStatus(`JSON exported to ${result.filePath}`);
     });
   }

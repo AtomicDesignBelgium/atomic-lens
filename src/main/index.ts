@@ -158,7 +158,7 @@ function createWindow(): void {
     title: "Atomic Lens V1",
     backgroundColor: "#f7f6f2",
     webPreferences: {
-      preload: path.join(__dirname, "../preload/index.js"),
+      preload: path.join(__dirname, "../preload/index.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false

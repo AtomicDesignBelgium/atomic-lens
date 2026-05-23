@@ -10,4 +10,4 @@ const auditApi: AuditApi = {
   exportJson: () => ipcRenderer.invoke("audit:export-json")
 };
 
-contextBridge.exposeInMainWorld("auditApi", auditApi);
+contextBridge.exposeInMainWorld("atomicLens", auditApi);
